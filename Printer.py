@@ -31,11 +31,32 @@ class Printer:
         print(f"{color.Red.value}Invalid Input{color.Default.value}")
         sleep(1)
 
+    def __parerr(self, err):
+        system("clear")
+        print(f"{color.Red.value}{err}{color.Default.value}")
+        print("1. Try Again")
+        print("2. Quit")
+        choice = int(input("Choice? (1 - 2):"))
+        match choice:
+            case 1:
+                return 1
+            case 2:
+                return 0
+            case _:
+                self.__error()
+
     def print_maze(self):
         if not isinstance(self.generator, MazeGenerator):
             print(f"{color.Red.value}There is no"
                   f" maze generator{color.Default.value}")
-        self.generator.generate_maze()
+        while True:
+            try:
+                self.generator.generate_maze()
+                break
+            except Exception as err:
+                if self.__parerr(err):
+                    continue
+                return
         maze = self.generator.get_maze()
         height = (len(maze) - 1) / 2
         width = (len(maze[0]) - 1) / 2
@@ -48,7 +69,7 @@ class Printer:
             try:
                 self.__options()
                 return
-            except (Exception, KeyboardInterrupt):
+            except Exception:
                 self.__error()
 
     @staticmethod
@@ -99,7 +120,14 @@ class Printer:
             option = int(input("Choice? (1 - 5): "))
             match option:
                 case 1:
-                    self.generator.generate_maze()
+                    while True:
+                        try:
+                            self.generator.generate_maze()
+                            break
+                        except Exception as err:
+                            if self.__parerr(err):
+                                continue
+                            return
                 case 2:
                     self.print_path = not self.print_path
                 case 3:

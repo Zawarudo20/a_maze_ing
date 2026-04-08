@@ -10,6 +10,7 @@ class MazeGenerator:
         self.__width = 0
         self.start = (0, 0)
         self.end = (0, 0)
+        self.seed = 0
         self.is_perfect = True
         self.__maze: list[list[str]] = []
         self.__path: list[type[int]] = []
@@ -20,6 +21,7 @@ class MazeGenerator:
         self.__width = values["WIDTH"] * 2 + 1
         sx, sy = values["ENTRY"]
         ex, ey = values["EXIT"]
+        self.seed = values["SEED"]
         self.is_perfect = values["PERFECT"]
         self.start = (sx * 2 + 1, sy * 2 + 1)
         self.end = (ex * 2 + 1, ey * 2 + 1)
@@ -68,6 +70,10 @@ class MazeGenerator:
 
     def generate_maze(self) -> None:
         self.update()
+        if self.seed >= 0:
+            random.seed(self.seed)
+        else:
+            random.seed(None)
         self.__maze = self.__make_first_maze()
         start_point = [self.start]
         while start_point:

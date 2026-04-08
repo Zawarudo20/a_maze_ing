@@ -3,5 +3,4 @@ from Printer import Printer
 
 if __name__ == "__main__":
     generator = MazeGenerator()
-    generator.generate_maze()
     Printer(generator).print_maze()
