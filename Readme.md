@@ -146,7 +146,7 @@ Several parts of the project are reusable:
 
   * Pathfinding (BFS)
   * Parsing system
-  * Maze color customization
+  * Maze color cust~omization
 
 ---
 

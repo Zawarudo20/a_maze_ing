@@ -13,7 +13,7 @@ class MazeGenerator:
         self.seed = 0
         self.is_perfect = True
         self.__maze: list[list[str]] = []
-        self.__path: list[type[int]] = []
+        self.__path: list[tuple[int, int]] = []
 
     def update(self) -> None:
         values = get_conf()
@@ -26,13 +26,13 @@ class MazeGenerator:
         self.start = (sx * 2 + 1, sy * 2 + 1)
         self.end = (ex * 2 + 1, ey * 2 + 1)
 
-    def __range_42_pos(self) -> list[tuple]:
-        cords: list[tuple] = [(0, 0),  (0, 2), (0, 4),
-                              (2, 4),
-                              (4, 4),  (4, 6),  (4, 8),
-                              (8, 0),  (8, 4),  (8, 6),  (8, 8),
-                              (10, 0),  (10, 4),  (10, 8),
-                              (12, 0),  (12, 2),  (12, 4),  (12, 8)]
+    def __range_42_pos(self) -> list[tuple[int, int]]:
+        cords: list[tuple[int, int]] = [(0, 0),  (0, 2), (0, 4),
+                                        (2, 4),
+                                        (4, 4),  (4, 6),  (4, 8),
+                                        (8, 0),  (8, 4),  (8, 6),  (8, 8),
+                                        (10, 0),  (10, 4),  (10, 8),
+                                        (12, 0),  (12, 2),  (12, 4),  (12, 8)]
         w = 6
         h = 4
         if (self.__width // 2) % 2 == 0:
@@ -58,7 +58,7 @@ class MazeGenerator:
                 maze[y][x] = Cells.Wall.value
                 x += 1
                 if (x, y) in self.__range_42_pos():
-                    maze[y][x] = "  "
+                    maze[y][x] = Cells.Visited.value
                 x += 1
             y += 1
             x = 0
@@ -68,9 +68,17 @@ class MazeGenerator:
             y += 1
         return maze
 
-    def generate_maze(self) -> str | None:
+    def generate_maze(self) -> Exception | None:
         try:
             self.update()
+            if self.start in self.__range_42_pos():
+                raise Exception("\033[1;31m!!--xxVALUE_ERRORxx--!! "
+                                "Start Point is in 42 Range"
+                                "\033[0m")
+            if self.end in self.__range_42_pos():
+                raise Exception("\033[1;31m!!--xxVALUE_ERRORxx--!! "
+                                "End Point is in 42 Range"
+                                "\033[0m")
         except Exception as err:
             return err
         if self.seed >= 0:
@@ -107,7 +115,7 @@ class MazeGenerator:
         self.get_output()
         return None
 
-    def get_output(self):
+    def get_output(self) -> None:
         binary: list[list[str]] = []
         i = 0
         y = 1
@@ -153,7 +161,7 @@ class MazeGenerator:
                     fd.write("N")
                 i += 2
 
-    def not_perfect(self):
+    def not_perfect(self) -> None:
         range_42 = self.__range_42_pos()
         y = 1
         while y in range(self.__height):
@@ -177,9 +185,9 @@ class MazeGenerator:
                 x += 2
             y += 2
 
-    def path_finder(self):
+    def path_finder(self) -> None:
         start_paths = [[self.start]]
-        while len(start_paths):
+        while True:
             paths = copy.deepcopy(start_paths)
             start_paths = []
             for path in paths:
@@ -206,8 +214,8 @@ class MazeGenerator:
                         new_path.append((dx, dy))
                         start_paths.append(new_path)
 
-    def get_maze(self):
+    def get_maze(self) -> list[list[str]]:
         return self.__maze
 
-    def get_path(self):
+    def get_path(self) -> list[tuple[int, int]]:
         return self.__path

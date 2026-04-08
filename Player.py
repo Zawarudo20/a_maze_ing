@@ -7,19 +7,19 @@ except ModuleNotFoundError:
 
 
 class Player:
-    def __init__(self, pos, time) -> None:
-        self.pos = pos
-        self.time = time
+    def __init__(self, pos: tuple[int, int]) -> None:
+        self.pos: tuple[int, int] = pos
         self.music = True
         self.sfx = True
 
-    def __check_path(self, path) -> None:
+    def __check_path(self, path: list[tuple[int, int]]) -> None:
         if self.pos in path:
             Popen(["afplay", "songs/correct.wav"])
         else:
             Popen(["afplay", "songs/wrong.mp3"])
 
-    def playing(self, maze, path) -> bool:
+    def playing(self, maze: list[list[str]],
+                path: list[tuple[int, int]]) -> bool:
         print("^: Move up")
         print(">: Move left")
         print("v: Moha Down")

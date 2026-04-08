@@ -13,25 +13,25 @@ except ModuleNotFoundError:
 
 
 class Printer:
-    def __init__(self, generator) -> None:
+    def __init__(self, generator: MazeGenerator) -> None:
         self.walls = color.White.value
         self.cell = color.Black.value
         self.logo = color.Grey.value
         self.path = color.Blue.value
         self.start = color.Red.value
         self.end = color.Green.value
-        self.player = None
+        self.player: Player | None = None
         self.print_path = False
         self.is_playing = False
         self.generator: MazeGenerator = generator
 
     @staticmethod
-    def __error():
+    def __error() -> None:
         system("clear")
         print(f"{color.Red.value}Invalid Input{color.Default.value}")
         sleep(1)
 
-    def __parerr(self, err):
+    def __parerr(self, err: Exception) -> int:
         system("clear")
         print(f"{color.Red.value}{err}{color.Default.value}")
         print("1. Try Again")
@@ -44,8 +44,9 @@ class Printer:
                 return 0
             case _:
                 self.__error()
+                return 1
 
-    def print_maze(self):
+    def print_maze(self) -> None:
         if not isinstance(self.generator, MazeGenerator):
             print(f"{color.Red.value}There is no"
                   f" maze generator{color.Default.value}")
@@ -56,11 +57,8 @@ class Printer:
                     continue
                 return
             break
-        maze = self.generator.get_maze()
-        height = (len(maze) - 1) / 2
-        width = (len(maze[0]) - 1) / 2
         try:
-            self.player = Player(self.generator.start, height * width * 0.1)
+            self.player = Player(self.generator.start)
         except NameError:
             self.player = None
         while True:
@@ -72,7 +70,7 @@ class Printer:
                 self.__error()
 
     @staticmethod
-    def __is_blocked(maze, pos):
+    def __is_blocked(maze: list[list[str]], pos: tuple[int, int]) -> bool:
         x, y = pos
         if (maze[y][x] == Cells.Visited.value
            and maze[y][x + 1] == Cells.Wall.value
@@ -82,7 +80,7 @@ class Printer:
             return True
         return False
 
-    def __printing(self):
+    def __printing(self) -> None:
         system("clear")
         maze = self.generator.get_maze()
         path = self.generator.get_path()
@@ -102,13 +100,14 @@ class Printer:
                     print(self.cell, end="")
                 elif maze[i][j] == Cells.Wall.value:
                     print(self.walls, end="")
-                if not self.is_playing or (j, i) != self.player.pos:
+                if not self.is_playing or (self.player
+                                           and (j, i) != self.player.pos):
                     print("  ", end="")
-                elif (j, i) == self.player.pos:
+                elif self.player and (j, i) == self.player.pos:
                     print("🕺", end="")
             print("\033[0m")
 
-    def __options(self):
+    def __options(self) -> None:
         while True:
             print("=== A_Maze_ing ===")
             print("1. Re-generate a new maze")
@@ -197,6 +196,7 @@ class Printer:
                             self.player.pos = self.generator.start
                         except NameError:
                             self.print_path = tmp
+                            self.is_playing = False
                             proc.terminate()
                             system("clear")
                             print(f"{color.Red.value}Please Install ReadChar"

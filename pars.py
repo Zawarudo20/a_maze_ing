@@ -119,7 +119,7 @@ def parse_conf() -> Config:
             validate_output_file(value)
             vals[key] = value.strip()
         elif key == "SEED":
-            if value == '':
+            if value == '' or value.lower() == "none":
                 vals[key] = -1
             else:
                 try:
@@ -128,7 +128,7 @@ def parse_conf() -> Config:
                     raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
                                      f"{key} must be an integer, "
                                      f"got '{value}'.\033[0m")
-                if new_val < 1:
+                if new_val < 0:
                     raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
                                      f"{key} must be positive.\033[0m")
                 else:
