@@ -68,8 +68,11 @@ class MazeGenerator:
             y += 1
         return maze
 
-    def generate_maze(self) -> None:
-        self.update()
+    def generate_maze(self) -> str | None:
+        try:
+            self.update()
+        except Exception as err:
+            return err
         if self.seed >= 0:
             random.seed(self.seed)
         else:
@@ -102,6 +105,7 @@ class MazeGenerator:
             self.not_perfect()
         self.path_finder()
         self.get_output()
+        return None
 
     def get_output(self):
         binary: list[list[str]] = []

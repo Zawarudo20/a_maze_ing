@@ -17,7 +17,7 @@ class Player:
         if self.pos in path:
             Popen(["afplay", "songs/correct.wav"])
         else:
-            Popen(["afplay", "songs/wrong.wav"])
+            Popen(["afplay", "songs/wrong.mp3"])
 
     def playing(self, maze, path) -> bool:
         print("^: Move up")

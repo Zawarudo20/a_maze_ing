@@ -50,13 +50,12 @@ class Printer:
             print(f"{color.Red.value}There is no"
                   f" maze generator{color.Default.value}")
         while True:
-            try:
-                self.generator.generate_maze()
-                break
-            except Exception as err:
-                if self.__parerr(err):
+            msg = self.generator.generate_maze()
+            if msg:
+                if self.__parerr(msg):
                     continue
                 return
+            break
         maze = self.generator.get_maze()
         height = (len(maze) - 1) / 2
         width = (len(maze[0]) - 1) / 2
@@ -121,13 +120,12 @@ class Printer:
             match option:
                 case 1:
                     while True:
-                        try:
-                            self.generator.generate_maze()
-                            break
-                        except Exception as err:
-                            if self.__parerr(err):
+                        msg = self.generator.generate_maze()
+                        if msg:
+                            if self.__parerr(msg):
                                 continue
                             return
+                        break
                 case 2:
                     self.print_path = not self.print_path
                 case 3:
@@ -178,6 +176,7 @@ class Printer:
                         sleep(3)
                     else:
                         try:
+                            self.player.pos = self.generator.start
                             self.is_playing = True
                             tmp = self.print_path
                             self.print_path = False
@@ -197,6 +196,7 @@ class Printer:
                             self.is_playing = False
                             self.player.pos = self.generator.start
                         except NameError:
+                            self.print_path = tmp
                             proc.terminate()
                             system("clear")
                             print(f"{color.Red.value}Please Install ReadChar"
