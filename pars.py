@@ -81,6 +81,3 @@ def get_conf():
     vals = parse_conf()
     validate_conf(vals)
     return vals
-vals = get_conf()
-for key in vals:
-    print(f"{key} = {vals[key]}")
