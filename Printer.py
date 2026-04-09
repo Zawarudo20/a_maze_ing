@@ -1,10 +1,10 @@
-from a_maze_ing import MazeGenerator
+from mazegen import MazeGenerator
 from time import sleep
 from os import system
-from subprocess import Popen
+from pars import get_conf
 from Enums import color, Cells
 try:
-    from Player import Player
+    from Game import Game
 except ModuleNotFoundError:
     system("clear")
     print(f"{color.Red.value}Player.py File is missing "
@@ -20,9 +20,8 @@ class Printer:
         self.path = color.Blue.value
         self.start = color.Red.value
         self.end = color.Green.value
-        self.player: Player | None = None
+        self.game: Game | None = None
         self.print_path = False
-        self.is_playing = False
         self.generator: MazeGenerator = generator
 
     @staticmethod
@@ -51,16 +50,23 @@ class Printer:
             print(f"{color.Red.value}There is no"
                   f" maze generator{color.Default.value}")
         while True:
-            msg = self.generator.generate_maze()
+            try:
+                values = get_conf()
+            except Exception as err:
+                if not self.__parerr(err):
+                    return
+                continue
+            msg = self.generator.update(values)
             if msg:
-                if self.__parerr(msg):
-                    continue
-                return
-            break
+                if not self.__parerr(msg):
+                    return
+            elif not msg:
+                break
+        self.generator.generate_maze()
         try:
-            self.player = Player(self.generator.start)
+            self.game = Game()
         except NameError:
-            self.player = None
+            self.game = None
         while True:
             self.__printing()
             try:
@@ -82,10 +88,10 @@ class Printer:
 
     def __printing(self) -> None:
         system("clear")
-        maze = self.generator.get_maze()
-        path = self.generator.get_path()
-        start = self.generator.start
-        end = self.generator.end
+        maze = self.generator.get_data("maze")
+        path = self.generator.get_data("path")
+        start = self.generator.get_data("start")
+        end = self.generator.get_data("end")
         for i in range(len(maze)):
             for j in range(len(maze[i])):
                 if self.__is_blocked(maze, (j, i)):
@@ -100,11 +106,7 @@ class Printer:
                     print(self.cell, end="")
                 elif maze[i][j] == Cells.Wall.value:
                     print(self.walls, end="")
-                if not self.is_playing or (self.player
-                                           and (j, i) != self.player.pos):
-                    print("  ", end="")
-                elif self.player and (j, i) == self.player.pos:
-                    print("🕺", end="")
+                print("  ", end="")
             print("\033[0m")
 
     def __options(self) -> None:
@@ -119,12 +121,19 @@ class Printer:
             match option:
                 case 1:
                     while True:
-                        msg = self.generator.generate_maze()
+                        try:
+                            values = get_conf()
+                        except Exception as err:
+                            if not self.__parerr(err):
+                                return
+                            continue
+                        msg = self.generator.update(values)
                         if msg:
-                            if self.__parerr(msg):
-                                continue
-                            return
-                        break
+                            if not self.__parerr(msg):
+                                return
+                        elif not msg:
+                            break
+                    self.generator.generate_maze()
                 case 2:
                     self.print_path = not self.print_path
                 case 3:
@@ -168,40 +177,16 @@ class Printer:
                         case 6:
                             self.logo = colors[num].value
                 case 4:
-                    if not self.player:
+                    if not self.game:
                         system("clear")
                         print(f"{color.Red.value}Player.py File is missing you"
                               f" Can't Play game mode{color.Default.value}")
                         sleep(3)
                     else:
-                        try:
-                            self.player.pos = self.generator.start
-                            self.is_playing = True
-                            tmp = self.print_path
-                            self.print_path = False
-                            proc = Popen(["afplay", "songs/Song.wav"])
-                            while self.player.pos != self.generator.end:
-                                if not proc.poll() and not self.player.music:
-                                    proc.terminate()
-                                elif proc.poll() and self.player.music:
-                                    proc = Popen(["afplay", "songs/Song.wav"])
-                                self.__printing()
-                                if self.player.playing(
-                                     self.generator.get_maze(),
-                                     self.generator.get_path()):
-                                    break
-                            proc.terminate()
-                            self.print_path = tmp
-                            self.is_playing = False
-                            self.player.pos = self.generator.start
-                        except NameError:
-                            self.print_path = tmp
-                            self.is_playing = False
-                            proc.terminate()
-                            system("clear")
-                            print(f"{color.Red.value}Please Install ReadChar"
-                                  f" to play the game{color.Default.value}")
-                            sleep(2)
+                        self.game.playing(self.generator.get_data("maze"),
+                                          self.generator.get_data("path"),
+                                          self.generator.get_data("start"),
+                                          self.generator.get_data("end"))
                 case 5:
                     return
                 case _:

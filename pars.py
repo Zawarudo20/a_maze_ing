@@ -1,15 +1,6 @@
-from typing import Dict, List, TypedDict, Tuple, cast
-import os
-
-
-class Config(TypedDict):
-    WIDTH: int
-    HEIGHT: int
-    ENTRY: Tuple[int, int]
-    EXIT: Tuple[int, int]
-    OUTPUT_FILE: str
-    PERFECT: bool
-    SEED: int
+from typing import Dict, List, Any
+from Enums import color
+import sys
 
 
 def error_exit(msg: str = "Unexpected maze error") -> None:
@@ -21,7 +12,7 @@ def key_missing(key: str) -> None:
                     f"Missing mandatory key: {key}\033[0m")
 
 
-def key_checking(vals: Config) -> None:
+def key_checking(vals: Dict[str, Any]) -> None:
     mandatory_keys = ["WIDTH", "HEIGHT", "ENTRY", "EXIT",
                       "OUTPUT_FILE", "PERFECT", "SEED"]
     for key in mandatory_keys:
@@ -33,25 +24,11 @@ def validate_output_file(path: str) -> None:
     if not path or not path.strip():
         error_exit("OUTPUT_FILE cannot be empty")
     path = path.strip()
-    if '\x00' in path:
-        error_exit("OUTPUT_FILE contains invalid characters")
-    # _, ext = os.path.splitext(path)
-    # if ext and ext != '.txt':
-    #     raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
-    #                      f"INVALID OUTPUT_FILE TYPE, GOT '{ext}' "
-    #                      "INSTEAD OF '.txt'.\033[0m")
-    if os.path.exists(path):
-        if not os.path.isfile(path):
-            error_exit(f"OUTPUT_FILE '{path}' "
-                       "exists but is not a regular file")
-        if not os.access(path, os.W_OK):
-            raise PermissionError("\033[1;31m!!--xxPERMISSION_ERRORxx--!! "
-                                  f"'{path}' is not writable.\033[0m")
 
 
-def parse_conf() -> Config:
+def parse_conf() -> Dict[str, Any]:
     try:
-        with open("config.txt", "rb") as file:
+        with open(sys.argv[1], "rb") as file:
             raw_bytes = file.read()
     except FileNotFoundError:
         raise FileNotFoundError("\033[1;31m!!--xxFILE_NOT_FOUND_ERRORxx--!! "
@@ -65,7 +42,7 @@ def parse_conf() -> Config:
         raise Exception("\033[1;31m!!--xxUNICODE_DECODE_ERRORxx--!! "
                         "'config.txt' contains binary or "
                         "non UTF-8 data.\033[0m")
-    vals: Dict[str, object] = {}
+    vals: Dict[str, Any] = {}
     mandatory_keys = ["WIDTH", "HEIGHT", "ENTRY", "EXIT",
                       "OUTPUT_FILE", "PERFECT", "SEED"]
     for line in content.splitlines():
@@ -87,10 +64,6 @@ def parse_conf() -> Config:
                 raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
                                  f"{key} must be an integer, "
                                  f"got '{value}'.\033[0m")
-            if new_val < 12:
-                raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
-                                 f"{key} is out of 42 range (must be >= 12, "
-                                 f"got {new_val}).\033[0m")
             vals[key] = new_val
         elif key == "ENTRY" or key == "EXIT":
             parts: List[str] = value.split(',')
@@ -120,34 +93,17 @@ def parse_conf() -> Config:
             vals[key] = value.strip()
         elif key == "SEED":
             if value == '' or value.lower() == "none":
-                vals[key] = -1
+                vals[key] = None
             else:
-                try:
-                    new_val = int(value)
-                except ValueError:
-                    raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
-                                     f"{key} must be an integer, "
-                                     f"got '{value}'.\033[0m")
-                if new_val < 0:
-                    raise ValueError("\033[1;31m!!--xxVALUE_ERRORxx--!! "
-                                     f"{key} must be positive.\033[0m")
-                else:
-                    vals[key] = new_val
-    return cast(Config, vals)
+                vals[key] = new_val
+    return vals
 
 
-def validate_conf(vals: Config) -> None:
-    key_checking(vals)
-    if vals["HEIGHT"] <= 0 or vals["WIDTH"] <= 0:
-        error_exit("WIDTH & HEIGHT must be positive.")
-    for x, y in [vals["ENTRY"], vals["EXIT"]]:
-        if not ((0 <= x < vals["WIDTH"]) and (0 <= y < vals["HEIGHT"])):
-            error_exit("ENTRY & EXIT are outside maze bounds.")
-    if vals["ENTRY"] == vals["EXIT"]:
-        error_exit("ENTRY & EXIT must be different")
-
-
-def get_conf() -> Config:
+def get_conf() -> Dict[str, Any]:
+    if len(sys.argv) < 2:
+        print("\033[1;31m!!--xxCONFIG_ERRORxx--!!'.\033[0m")
+        print(f"{color.Red.value}\033[1;30mUSE: "
+              "'python3 a_maze_int.py <config_file>'")
+        sys.exit(1)
     vals = parse_conf()
-    validate_conf(vals)
     return vals

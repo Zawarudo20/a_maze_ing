@@ -1,13 +1,13 @@
 .PHONY: install run debug lint lint-strict clean
 
 install:
-	pip install -r requirements.txt
+	python3 -m pip install flake8 mypy build readchar
 
 run:
-	python3 main.py config.txt
+	python3 a_maze_ing.py config.txt
 
 debug:
-	python3 -m pdb main.py config.txt
+	python3 -m pdb a_maze_ing.py config.txt
 
 lint:
 	flake8 .

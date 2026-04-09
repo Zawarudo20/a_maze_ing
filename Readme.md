@@ -16,10 +16,16 @@ The project also includes customization features such as colored maze output and
 
 ### Installation
 
-First, install the project using the Makefile:
+First, install the project dependency using the Makefile:
 
 ```bash
 make install
+```
+
+Then, install the mazegen package
+
+```bash
+python3 -m pip install mazegen-1.0.0-py3-none-any.whl
 ```
 
 ### Run the program
@@ -124,9 +130,11 @@ Why BFS:
 
 Several parts of the project are reusable:
 
-* (A_Maze_ing.py - pars.py - Enums.py) files that has:
+* A_Maze_ing.py files that has:
     * Maze generation logic (can be reused in games or simulations)
     * BFS pathfinding (usable in grids, maps, AI systems)
+    * To generate maze send {HEIGHT: INT, WIDTH: INT, ENTRY: TUPLE[INT, INT], EXIT: TUPLE[INT, INT], PERFECT: BOOL, OUTPUT_FILE: STR, SEED: OPTIONAL} to MazeGenerator.update()
+    then MazeGenerator.generate_maze()
 * pars.py file for Parsing system
 * Printing.py for printing MazeGenerator class that in (A_Maze_ing.py)
 
@@ -141,12 +149,14 @@ Several parts of the project are reusable:
   * Maze generation (Prim)
   * Output file handling
   * Game mode
+  * Readme
 
 * **Rakaarir**
 
   * Pathfinding (BFS)
   * Parsing system
   * Maze color cust~omization
+  * Makefile
 
 ---
 
@@ -178,16 +188,20 @@ Several parts of the project are reusable:
 
 * Python standard library
 * ReadChar
-* Makefile for automation
+* Makefile
+* poetry
 
 ---
 
 ## Resources
 
-* Prim’s Algorithm documentation
-* Breadth-First Search (BFS) tutorials
-* Python official documentation
+* [Prim’s Algorithm](https://www.youtube.com/shorts/GHQ4fjPCVLI)
+* [Maze generation algorithms](https://www.youtube.com/watch?v=ioUl1M77hww&t=190s)
+* [BFS pathfinding](https://www.youtube.com/watch?v=aW9kZcJx64o)
 
 ### AI Usage
 
-No AI tools were used in the development of this project.
+We used AI to:
+* get famous maze generation algorithms
+* get famous path-finding generation algorithms
+* get some usable python libraries
