@@ -1,7 +1,7 @@
 .PHONY: install run debug lint lint-strict clean
 
 install:
-	python3 -m pip install requirements.txt
+	python3 -m pip install -r requirements.txt
 
 run:
 	python3 a_maze_ing.py config.txt
